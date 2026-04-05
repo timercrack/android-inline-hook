@@ -55,6 +55,12 @@ static bool shadowhook_disable = false;
 static int shadowhook_init_errno = SHADOWHOOK_ERRNO_UNINIT;
 static shadowhook_mode_t shadowhook_default_mode = SHADOWHOOK_MODE_SHARED;
 
+#if defined(SHADOWHOOK_BH_STATIC_SINGLE_SO)
+#define SHADOWHOOK_BH_LINKER_MONITOR_ENABLED 0
+#else
+#define SHADOWHOOK_BH_LINKER_MONITOR_ENABLED 1
+#endif
+
 const char *shadowhook_get_version(void) {
   return "shadowhook version " SHADOWHOOK_VERSION;
 }
@@ -85,7 +91,9 @@ int shadowhook_init(shadowhook_mode_t default_mode, bool debuggable) {
       sh_island_init();
       sh_enter_init();
       sh_switch_init();
+#if SHADOWHOOK_BH_LINKER_MONITOR_ENABLED
       if (__predict_false(0 != sh_linker_init())) GOTO_END(SHADOWHOOK_ERRNO_INIT_LINKER);
+#endif
       if (__predict_false(0 != sh_task_init())) GOTO_END(SHADOWHOOK_ERRNO_INIT_TASK);
 
 #undef GOTO_END
@@ -561,6 +569,9 @@ int shadowhook_register_dl_init_callback(shadowhook_dl_info_t pre, shadowhook_dl
   if (__predict_false(shadowhook_disable)) SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_DISABLED);
   if (__predict_false(SHADOWHOOK_ERRNO_OK != shadowhook_init_errno))
     SH_ERRNO_SET_RET_FAIL(shadowhook_init_errno);
+#if !SHADOWHOOK_BH_LINKER_MONITOR_ENABLED
+  SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
+#endif
 #ifdef SH_CONFIG_COMPATIBLE_WITH_ARM_ANDROID_4_X
   if (__predict_false(sh_util_get_api_level() < __ANDROID_API_L__))
     SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
@@ -576,6 +587,9 @@ int shadowhook_unregister_dl_init_callback(shadowhook_dl_info_t pre, shadowhook_
   if (__predict_false(shadowhook_disable)) SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_DISABLED);
   if (__predict_false(SHADOWHOOK_ERRNO_OK != shadowhook_init_errno))
     SH_ERRNO_SET_RET_FAIL(shadowhook_init_errno);
+#if !SHADOWHOOK_BH_LINKER_MONITOR_ENABLED
+  SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
+#endif
 #ifdef SH_CONFIG_COMPATIBLE_WITH_ARM_ANDROID_4_X
   if (__predict_false(sh_util_get_api_level() < __ANDROID_API_L__))
     SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
@@ -591,6 +605,9 @@ int shadowhook_register_dl_fini_callback(shadowhook_dl_info_t pre, shadowhook_dl
   if (__predict_false(shadowhook_disable)) SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_DISABLED);
   if (__predict_false(SHADOWHOOK_ERRNO_OK != shadowhook_init_errno))
     SH_ERRNO_SET_RET_FAIL(shadowhook_init_errno);
+#if !SHADOWHOOK_BH_LINKER_MONITOR_ENABLED
+  SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
+#endif
 #ifdef SH_CONFIG_COMPATIBLE_WITH_ARM_ANDROID_4_X
   if (__predict_false(sh_util_get_api_level() < __ANDROID_API_L__))
     SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
@@ -606,6 +623,9 @@ int shadowhook_unregister_dl_fini_callback(shadowhook_dl_info_t pre, shadowhook_
   if (__predict_false(shadowhook_disable)) SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_DISABLED);
   if (__predict_false(SHADOWHOOK_ERRNO_OK != shadowhook_init_errno))
     SH_ERRNO_SET_RET_FAIL(shadowhook_init_errno);
+#if !SHADOWHOOK_BH_LINKER_MONITOR_ENABLED
+  SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
+#endif
 #ifdef SH_CONFIG_COMPATIBLE_WITH_ARM_ANDROID_4_X
   if (__predict_false(sh_util_get_api_level() < __ANDROID_API_L__))
     SH_ERRNO_SET_RET_FAIL(SHADOWHOOK_ERRNO_NOT_SUPPORT);
